@@ -11,12 +11,34 @@ import View.Header
 import qualified Data.Text.Lazy as D
 import qualified Text.Blaze.Html5 as H
 
+-- $setup
+-- >>> :set -XOverloadedStrings
+-- >>> import Data.List(isPrefixOf, isSuffixOf)
+-- >>> import Test.QuickCheck
+-- >>> import qualified Data.Text as T
+-- >>> instance Arbitrary Definition where arbitrary = do a <- arbitrary; b <- arbitrary; return (Definition (T.pack a) (T.pack b))
+
+-- | 
+-- 
+-- >>> render []
+-- "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2><p>There are no definitions yet.</p><p><a href=\"/add\">Add definition</a></p></body></html>"
+--
+-- >>> render [Definition "abc" "def"]
+-- "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2><ul><li><span class=\"phrase\">abc</span>: <span class=\"meaning\">def</span></li></ul><p><a href=\"/add\">Add definition</a></p></body></html>"
+--
+-- >>> render [Definition "abc" "def", Definition "abc&def" "ghi&jkl\"mno"]
+-- "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2><ul><li><span class=\"phrase\">abc</span>: <span class=\"meaning\">def</span></li><li><span class=\"phrase\">abc&amp;def</span>: <span class=\"meaning\">ghi&amp;jkl&quot;mno</span></li></ul><p><a href=\"/add\">Add definition</a></p></body></html>"
+--
+-- prop> let r = D.unpack (render s) in "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2>" `isPrefixOf` r
+--
+-- prop> let r = D.unpack (render s) in "<p><a href=\"/add\">Add definition</a></p></body></html>" `isSuffixOf` r
 render :: [Definition] -> D.Text
 render definitions = renderHtml . H.docTypeHtml $ do
   header
-  H.body $ do
-    H.h1 "Ahoy! Welcome to Pirate Gold."
-    H.h2 "'ere be some golden terms ye ought to be using me hearties..."
+  H.body H.! class_ "main" $ do
+    H.div H.! class_ "head" $ do
+      H.h1 "Ahoy! Welcome to Pirate Gold."
+      H.h2 "'ere be some golden terms ye ought to be using me hearties..."
     if null definitions 
     then H.p "There are no definitions yet."
     else H.ul . forM_ definitions $ (\def -> H.li $ do 
