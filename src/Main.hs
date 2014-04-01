@@ -11,6 +11,7 @@ import Network.Wai.Handler.Warp (settingsPort, settingsHost)
 import Data.Conduit.Network
 import Network.HTTP.Types.Status
 import Database.PostgreSQL.Simple
+import Transform
 import qualified Data.Text.Lazy as D
 import qualified Model.Definition as Def
 import qualified View.Index
@@ -57,7 +58,7 @@ processRoutes conn = do
 listDefinitions :: Connection -> ActionM ()
 listDefinitions conn = do
     defs <- liftIO (Def.allDefinitions conn)
-    html (View.Index.render defs)
+    html (View.Index.render (toPigLatin defs))
 
 renderAddForm :: ActionM ()
 renderAddForm = do
@@ -65,15 +66,18 @@ renderAddForm = do
 
 postDefinition :: Connection -> ActionM ()
 postDefinition conn = do
-    p <- params 
-    maybe returnError addDef (sequence (map (getParam p) ["phrase", "meaning"]))
+    prms <- params 
+    maybe returnError addDef (sequence (map (getParam prms) ["phrase", "meaning"]))
     where getParam parameters name = lookup name parameters
           returnError = createResponse (View.Error.render "Missing parameter") badRequest400
-          addDef (p:m:_) = do 
-              added <- liftIO (Def.addDefinition conn (Def.Definition p m))
-              case added of
-                  Left errorMessage -> createResponse (View.Error.render errorMessage) internalServerError500
-                  Right _ -> createResponse View.Added.render ok200 
+          addDef (p:m:_) 
+              | D.null p = createResponse (View.Error.render "Empty phrase parameter") badRequest400
+              | D.null m = createResponse (View.Error.render "Empty meaning parameter") badRequest400
+              | otherwise = do
+                  added <- liftIO (Def.addDefinition conn (Def.Definition p m))
+                  case added of
+                      Left errorMessage -> createResponse (View.Error.render errorMessage) internalServerError500
+                      Right _ -> createResponse View.Added.render ok200 
           addDef _ = do 
               createResponse (View.Error.render "Internal error") internalServerError500
 

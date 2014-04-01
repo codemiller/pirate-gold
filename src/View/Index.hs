@@ -32,7 +32,7 @@ import qualified Text.Blaze.Html5 as H
 -- prop> let r = D.unpack (render s) in "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2>" `isPrefixOf` r
 --
 -- prop> let r = D.unpack (render s) in "<p><a href=\"/add\">Add definition</a></p></body></html>" `isSuffixOf` r
-render :: [Definition] -> D.Text
+render :: [(Definition, D.Text)] -> D.Text
 render definitions = renderHtml . H.docTypeHtml $ do
   header
   H.body H.! class_ "main" $ do
@@ -42,6 +42,7 @@ render definitions = renderHtml . H.docTypeHtml $ do
     if null definitions 
     then H.p "There are no definitions yet."
     else H.ul . forM_ definitions $ (\def -> H.li $ do 
-                                         (H.span H.! class_ "phrase") (H.toHtml (phrase def)) <> ": "
-                                         (H.span H.! class_ "meaning") (H.toHtml (meaning def)))
+                                         (H.span H.! class_ "phrase") (H.toHtml (D.toUpper (phrase (fst def)))) <> ": "
+                                         (H.span H.! class_ "meaning") (H.toHtml (meaning (fst def))) <> " ("
+                                         (H.span H.! class_ "piglatin") (H.toHtml (snd def)) <> ")")
     H.p ((H.a H.! href "/add") "Add definition")
