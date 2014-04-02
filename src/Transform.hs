@@ -6,7 +6,8 @@ module Transform (
 
 import Model.Definition
 import Data.Monoid ((<>))
-import qualified Data.Text.Lazy as D (Text, words, unwords, length, head, tail, toLower) 
+import Data.Char (toLower)
+import qualified Data.Text.Lazy as D (Text, words, unwords, length, head, tail, cons) 
 
 toPigLatin :: [Definition] -> [(Definition, D.Text)]
 toPigLatin = foldr (\def acc -> (def, processWords (meaning def)):acc) [] 
@@ -17,5 +18,4 @@ processWords s = D.unwords (foldr (\word acc -> (translate word):acc) [] (D.word
 translate :: D.Text -> D.Text
 translate w
     | D.length w < 2 = w
-    -- | otherwise = D.tail w <> (D.toLower (D.head w)) <> "ay"
-    | otherwise = D.tail w <> "ay"
+    | otherwise = D.tail w <> ((toLower (D.head w)) `D.cons` "ay")

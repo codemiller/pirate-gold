@@ -15,21 +15,20 @@ import qualified Text.Blaze.Html5 as H
 -- >>> :set -XOverloadedStrings
 -- >>> import Data.List(isPrefixOf, isSuffixOf)
 -- >>> import Test.QuickCheck
--- >>> import qualified Data.Text as T
--- >>> instance Arbitrary Definition where arbitrary = do a <- arbitrary; b <- arbitrary; return (Definition (T.pack a) (T.pack b))
+-- >>> instance Arbitrary Definition where arbitrary = do a <- arbitrary; b <- arbitrary; return (Definition (D.pack a) (D.pack b))
+-- >>> instance Arbitrary D.Text where arbitrary = do a <- arbitrary; return (D.pack a)
 
 -- | 
 -- 
 -- >>> render []
--- "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2><p>There are no definitions yet.</p><p><a href=\"/add\">Add definition</a></p></body></html>"
+-- "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body class=\"main\"><div class=\"head\"><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2></div><p>There are no definitions yet.</p><p><a href=\"/add\">Add definition</a></p></body></html>"
 --
--- >>> render [Definition "abc" "def"]
--- "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2><ul><li><span class=\"phrase\">abc</span>: <span class=\"meaning\">def</span></li></ul><p><a href=\"/add\">Add definition</a></p></body></html>"
+-- >>> render [(Definition "abc" "def", "efday")]
+-- "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body class=\"main\"><div class=\"head\"><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2></div><ul><li><span class=\"phrase\">ABC</span>: <span class=\"meaning\">def</span> (<span class=\"piglatin\">efday</span>)</li></ul><p><a href=\"/add\">Add definition</a></p></body></html>"
+-- >>> render [(Definition "abc" "def", "bcay"), (Definition "abc&def" "ghi&jkl\"mno", "bc&defaay")]
+-- "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body class=\"main\"><div class=\"head\"><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2></div><ul><li><span class=\"phrase\">ABC</span>: <span class=\"meaning\">def</span> (<span class=\"piglatin\">bcay</span>)</li><li><span class=\"phrase\">ABC&amp;DEF</span>: <span class=\"meaning\">ghi&amp;jkl&quot;mno</span> (<span class=\"piglatin\">bc&amp;defaay</span>)</li></ul><p><a href=\"/add\">Add definition</a></p></body></html>"
 --
--- >>> render [Definition "abc" "def", Definition "abc&def" "ghi&jkl\"mno"]
--- "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2><ul><li><span class=\"phrase\">abc</span>: <span class=\"meaning\">def</span></li><li><span class=\"phrase\">abc&amp;def</span>: <span class=\"meaning\">ghi&amp;jkl&quot;mno</span></li></ul><p><a href=\"/add\">Add definition</a></p></body></html>"
---
--- prop> let r = D.unpack (render s) in "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2>" `isPrefixOf` r
+-- prop> let r = D.unpack (render s) in "<!DOCTYPE HTML>\n<html><head><title>Pirate Gold</title><link rel=\"stylesheet\" href=\"css/style.css\"></head><body class=\"main\"><div class=\"head\"><h1>Ahoy! Welcome to Pirate Gold.</h1><h2>&#39;ere be some golden terms ye ought to be using me hearties...</h2></div>" `isPrefixOf` r
 --
 -- prop> let r = D.unpack (render s) in "<p><a href=\"/add\">Add definition</a></p></body></html>" `isSuffixOf` r
 render :: [(Definition, D.Text)] -> D.Text

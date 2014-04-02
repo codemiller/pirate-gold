@@ -4,6 +4,8 @@ module Model.Definition (
               Definition(..)
             , createDefinitionTable
             , allDefinitions
+            , getDefinitionById
+            , getDefinitionByPhrase
             , addDefinition
             ) where
 
@@ -26,6 +28,12 @@ instance FromRow Definition where
 instance ToRow Definition where
   toRow (Definition p m) = map toField [p, m]
 
+instance ToRow Text where
+  toRow t = map toField [t]
+
+instance ToRow Int where
+  toRow i = map toField [i]
+
 createDefinitionTable :: Connection -> IO Int64 
 createDefinitionTable conn = execute_ conn
     "CREATE TABLE IF NOT EXISTS definition (\
@@ -35,6 +43,12 @@ createDefinitionTable conn = execute_ conn
 
 allDefinitions :: Connection -> IO [Definition]
 allDefinitions conn = query_ conn "SELECT phrase, meaning FROM definition"
+
+getDefinitionById :: Connection -> Int -> IO [Definition]
+getDefinitionById conn i = query conn "SELECT phrase, meaning FROM definition WHERE id = ?" (i)
+
+getDefinitionByPhrase :: Connection -> Text -> IO [Definition]
+getDefinitionByPhrase conn p = query conn "SELECT phrase, meaning FROM definition WHERE phrase = ?" (p)
 
 -- |
 -- 

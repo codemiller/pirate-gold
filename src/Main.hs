@@ -66,20 +66,27 @@ renderAddForm = do
 
 postDefinition :: Connection -> ActionM ()
 postDefinition conn = do
-    prms <- params 
-    maybe returnError addDef (sequence (map (getParam prms) ["phrase", "meaning"]))
-    where getParam parameters name = lookup name parameters
+    parameters <- params 
+    maybe returnError addDef (sequence (map (getParam parameters) ["phrase", "meaning"]))
+    where getParam prms name = lookup name prms
           returnError = createResponse (View.Error.render "Missing parameter") badRequest400
           addDef (p:m:_) 
               | D.null p = createResponse (View.Error.render "Empty phrase parameter") badRequest400
               | D.null m = createResponse (View.Error.render "Empty meaning parameter") badRequest400
-              | otherwise = do
-                  added <- liftIO (Def.addDefinition conn (Def.Definition p m))
-                  case added of
-                      Left errorMessage -> createResponse (View.Error.render errorMessage) internalServerError500
-                      Right _ -> createResponse View.Added.render ok200 
-          addDef _ = do 
+              | otherwise = addDefinition conn p m
+          addDef _ =  
               createResponse (View.Error.render "Internal error") internalServerError500
+
+addDefinition :: Connection -> D.Text -> D.Text -> ActionM ()
+addDefinition conn phrase meaning = do
+    result <- liftIO (Def.getDefinitionByPhrase conn phrase)
+    case result of
+        [] -> do 
+            added <- liftIO (Def.addDefinition conn (Def.Definition phrase meaning))
+            case added of
+                Left errorMessage -> createResponse (View.Error.render errorMessage) internalServerError500
+                Right _ -> createResponse View.Added.render ok200 
+        _ -> createResponse (View.Error.render "Duplicate phrase") badRequest400
 
 createResponse :: D.Text -> Status -> ActionM ()
 createResponse view stat = do
