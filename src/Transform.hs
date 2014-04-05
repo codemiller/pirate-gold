@@ -5,17 +5,15 @@ module Transform (
        ) where
 
 import Model.Definition
-import Data.Monoid ((<>))
 import Data.Char (toLower)
-import qualified Data.Text.Lazy as D (Text, words, unwords, length, head, tail, cons) 
+import qualified Data.Text.Lazy as D (Text, pack, unpack) 
 
 toPigLatin :: [Definition] -> [(Definition, D.Text)]
-toPigLatin = foldr (\def acc -> (def, processWords (meaning def)):acc) [] 
+toPigLatin = map (\(d, s) -> (d, D.pack s)) . translateMeanings
 
-processWords :: D.Text -> D.Text
-processWords s = D.unwords (foldr (\word acc -> (translate word):acc) [] (D.words s))
+translateMeanings :: [Definition] -> [(Definition, String)]
+translateMeanings = map (\d -> (d, unwords (map translateWord (words (D.unpack (meaning d))))))
 
-translate :: D.Text -> D.Text
-translate w
-    | D.length w < 2 = w
-    | otherwise = D.tail w <> ((toLower (D.head w)) `D.cons` "ay")
+translateWord :: String -> String
+translateWord (a:b:r) = b:r ++ [(toLower a)] ++ "ay"
+translateWord x = x
