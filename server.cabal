@@ -1,4 +1,4 @@
-name:                 fp-in-the-cloud
+name:                 pirate-gold 
 version:              0.1
 license:              Apache-2.0
 license-file:         LICENCE
@@ -8,14 +8,14 @@ copyright:            Copyright (C) 2014 Katie Miller
 synopsis:             Functional Programming in the Cloud workshop for Codemania 2014.
 category:             Web
 description:          Functional Programming in the Cloud workshop for Codemania 2014.
-homepage:             https://github.com/codemiller/fp-in-the-cloud
-bug-reports:          https://github.com/codemiller/fp-in-the-cloud/issues
+homepage:             https://github.com/codemiller/pirate-gold
+bug-reports:          https://github.com/codemiller/pirate-gold/issues
 cabal-version:        >= 1.10
 build-type:           Custom
 
 source-repository     head
   type:               git
-  location:           git@github.com:codemiller/fp-in-the-cloud.git
+  location:           git@github.com:codemiller/pirate-gold.git
 
 library
   default-language:   Haskell2010
